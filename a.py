@@ -27,13 +27,12 @@ def add(conexao, cursor):
         reclamacao = input("Digite uma reclamação que não esteja vazia: ").strip()
     cursor.execute("INSERT INTO ouvidoria(reclamacao) VALUES (%s);", (reclamacao,))
     cursor.commit()
-    cursor.close()
 
 def listar(conexao, cursor, vazio = False, qntia = False):
     cursor.execute("SELECT * FROM ouvidoria;")
     lista = cursor.fetchall()
     if qntia == True:
-        return (len(lista)
+        return (len(lista))
     if len(lista) = 0:
         print("A lista está vazia")
         t(1.5)
@@ -49,29 +48,32 @@ def listar(conexao, cursor, vazio = False, qntia = False):
 def vazio(conexao, cursor):
     verificacao = listar(conexao, cursor, vazio = True)
     return verificacao
-    
-    
+     
 def buscar(conexao, cursor, resultado = False):
     if not vazio(conexao, cursor):
         try:
             cursor.execute ("SELECT * FROM ouvidoria WHERE id = (%s);", (int_input("ID: ",))
-            id = cursor.fetchall()[0]
+            id = cursor.fetchall()[0][0]
             if resultado == True:
                 return id
         except:
             print("Esse ID está indisponível no momento, tente novamente")
+    
 def editar(conexao,cursor)
     id = buscar(conexao, cursor, resultado = True)
+    reclamacao = input("Digite sua reclamação").strip()
+    while len(reclamacao) == 0:
+        reclamacao = input("Digite uma reclamação que não esteja vazia: ").strip()
+    cursor.execute("UPDATE ouvidoria SET reclamacao = (%s) WHERE id = (%s);", (reclamacao,) (id,))
 
 def qnt(conexao, cursor):
-    tamanho = busca(conexao, cursor, qntia = True)
+    tamanho = listar(conexao, cursor, qntia = True)
     print(f"Há {tamanho} reclamações no momento")
 
 def remover(conexao, cursor):
     id = (conexao, cursor, resultado = True)
-    cursor.execute (f"DELETE * from ouvidoria WHERE id = {%s};", (id,))
-    
-    
+    cursor.execute ("DELETE * from ouvidoria WHERE id = {%s};", (id,))
+   
 def sair(conexao, cursor):
     print("Saindo", flush = True, end = "")
     for x in range(3):
