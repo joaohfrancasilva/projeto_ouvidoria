@@ -2,13 +2,25 @@ import mysql.connector
 from time import sleep as t
 
 def criar_conexao():
-    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "1234")
+    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "Jhfs180907@")
     cursor = conexao.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS db;")
-    cursor.execute("USE DATABASE db;")
-    cursor.execute("CREATE TABLE IF NOT EXISTS ouvidoria (ID INT AUTO_INCREMENT PRIMARY KEY, reclamacao VARCHAR(900) NOT NULL);")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS banco_dados;")
+    cursor.execute("USE banco_dados;")
+    cursor.execute("CREATE TABLE IF NOT EXISTS reclamacoes(id INT AUTO_INCREMENT PRIMARY KEY, reclamacao VARCHAR(900));")
     cursor.close()
     return conexao
+
+def vazio(conexao):
+    cursor = conexao.cursor()
+    cursor.execute("SELECT * FROM reclamacoes;")
+    tamanho = len(cursor.fetchall())
+    if tamanho == 0:
+        print("A lista está vazia")
+        t(1.5)
+        cursor.close()
+        return True
+    else:
+        return False
 
 def menu():
     opcoes = ["Adicionar", "Listar", "Pesquisar", "Editar", "Quantidade","Remoção", "Sair"]
@@ -21,70 +33,81 @@ def int_input(msg, verificacao = False):
         tentativa = input("Tente novamente: ").strip()
     return int(tentativa)
 
-def add(conexao, cursor):
-    reclamacao = input("Digite sua reclamação").strip()
-    while len(reclamacao) == 0:
-        reclamacao = input("Digite uma reclamação que não esteja vazia: ").strip()
-    cursor.execute("INSERT INTO ouvidoria(reclamacao) VALUES (%s);", (reclamacao,))
-    cursor.commit()
+def add(conexao):
+    cursor = conexao.cursor()
+    reclamacao = input("Digite sua reclamação: ").strip()
+    cursor.execute("INSERT INTO reclamacoes(reclamacao) VALUES (%s);", (reclamacao,))
+    conexao.commit()
+    cursor.close()
+    print("Reclamação adicionada!")
+    t(1.5)
 
-def listar(conexao, cursor, vazio = False, qntia = False):
-    cursor.execute("SELECT * FROM ouvidoria;")
-    lista = cursor.fetchall()
-    if qntia == True:
-        return (len(lista))
-    if len(lista) = 0:
-        print("A lista está vazia")
-        t(1.5)
-        return True
-    else:
-        if vazio == False:
-            for pos, reclamacao in enumerate(lista):
-                print(f"ID: {pos + 1}  | Reclamação: {reclamacao}")
-                t(0.5)
-            t(1)
-        return False
+def listar(conexao):
+    if not vazio(conexao):
+        cursor = conexao.cursor()
+        cursor.execute("SELECT * FROM reclamacoes;")
+        lista = cursor.fetchall()
+        for reclamacao in lista:
+            item = {"ID": reclamacao[0], "Reclamação": reclamacao[1]}
+            print(f"ID: {item["ID"]}  | Reclamação: {item["Reclamação"]}")
+            t(0.5)
+        t(1)
     
-def vazio(conexao, cursor):
-    verificacao = listar(conexao, cursor, vazio = True)
-    return verificacao
-     
-def buscar(conexao, cursor, resultado = False):
-    if not vazio(conexao, cursor):
+def pesquisar(conexao, busca = False):
+    if not vazio(conexao):
         try:
-            cursor.execute ("SELECT * FROM ouvidoria WHERE id = (%s);", (int_input("ID: ",))
-            id = cursor.fetchall()[0][0]
-            if resultado == True:
-                return id
+            cursor = conexao.cursor()
+            cursor.execute ("SELECT * FROM reclamacoes WHERE id = (%s);", (int_input("ID: "),))
+            resultado_query = cursor.fetchall()[0]
+            item = {"ID": resultado_query[0], "Reclamação": resultado_query[1]}
+            print(f"ID: {item["ID"]}  | Reclamação: {item["Reclamação"]}")
+            t(1.5)
+            if busca == True:
+                return item["ID"]
         except:
-            print("Esse ID está indisponível no momento, tente novamente")
+            print("Esse ID está indisponível no momento, tente novamente.")
+            t(1.5)
+            return "Inválido"
     
-def editar(conexao,cursor)
-    id = buscar(conexao, cursor, resultado = True)
-    reclamacao = input("Digite sua reclamação").strip()
-    while len(reclamacao) == 0:
-        reclamacao = input("Digite uma reclamação que não esteja vazia: ").strip()
-    cursor.execute("UPDATE ouvidoria SET reclamacao = (%s) WHERE id = (%s);", (reclamacao,) (id,))
+def editar(conexao):
+    if not vazio(conexao):
+        cursor = conexao.cursor()
+        id = pesquisar(conexao, busca = True)
+        if id != "Inválido":
+            reclamacao = input("Digite sua reclamação: ").strip()
+            cursor.execute("UPDATE reclamacoes SET reclamacao = (%s) WHERE id = (%s);", (reclamacao, id))
+            conexao.commit()
+            print("Reclamação editada!")
+            t(1.5)
 
-def qnt(conexao, cursor):
-    tamanho = listar(conexao, cursor, qntia = True)
-    print(f"Há {tamanho} reclamações no momento")
+def qnt(conexao):
+    cursor = conexao.cursor()
+    cursor.execute("SELECT * FROM reclamacoes;")
+    tamanho = len(cursor.fetchall())
+    print(f"Há {tamanho} reclamações no momento.")
+    cursor.close()
+    t(1.5)
 
-def remover(conexao, cursor):
-    id = (conexao, cursor, resultado = True)
-    cursor.execute ("DELETE * from ouvidoria WHERE id = {%s};", (id,))
-   
-def sair(conexao, cursor):
+def remover(conexao):
+    if not vazio(conexao):
+        cursor = conexao.cursor()
+        id = pesquisar(conexao, busca = True)
+        if id != "Inválido":
+            cursor.execute ("DELETE FROM reclamacoes WHERE id = (%s);", (id,))
+            conexao.commit()
+            print("Reclamação excluída!")
+            t(1.5)
+        cursor.close()
+
+def sair(conexao):
     print("Saindo", flush = True, end = "")
     for x in range(3):
         t(0.5)
         print(".", flush = True, end = "")
-    cursor.close()
     conexao.close()
 
 def main():
     conexao = criar_conexao()
-    cursor = conexao.cursor()
     opcao = "Loop"
     funcoes = [menu, add, listar, pesquisar, editar, qnt, remover, sair]
     while opcao != "Parada":
@@ -92,7 +115,7 @@ def main():
         opcao = int_input("Número da opção: ", verificacao = True)
         for x, funcao in enumerate(funcoes):
             if opcao == x:
-                funcao(conexao, cursor)
+                funcao(conexao)
                 if x == 7:
                     opcao = "Parada"
 main()
