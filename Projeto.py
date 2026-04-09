@@ -1,8 +1,13 @@
+'''Projeto 2026.1 Fase 2 (Ouvidoria + MYSQL)
+Feito por João Henrique de França e Silva e Joel Nicollas Silva Pereira
+Feito dia 09/04/2026
+'''
+
 import mysql.connector
 from time import sleep as t
 
 def criar_conexao():
-    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "Jhfs180907@")
+    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "admin" #Ou qualquer outra senha)
     cursor = conexao.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS banco_dados;")
     cursor.execute("USE banco_dados;")
@@ -24,8 +29,10 @@ def vazio(conexao):
 
 def menu():
     opcoes = ["Adicionar", "Listar", "Pesquisar", "Editar", "Quantidade","Remoção", "Sair"]
+    print("-="*20)
     for pos, opcao in enumerate(opcoes):
         print(f"{pos+1}° Opção: {"->":^10} {opcao} ")
+    print("-="*20)
 
 def int_input(msg, verificacao = False):
     tentativa = input(msg).strip()
@@ -108,8 +115,8 @@ def sair(conexao):
 
 def main():
     conexao = criar_conexao()
-    opcao = "Loop"
     funcoes = [menu, add, listar, pesquisar, editar, qnt, remover, sair]
+    opcao = "Loop"
     while opcao != "Parada":
         menu()
         opcao = int_input("Número da opção: ", verificacao = True)
@@ -118,4 +125,5 @@ def main():
                 funcao(conexao)
                 if x == 7:
                     opcao = "Parada"
+
 main()
