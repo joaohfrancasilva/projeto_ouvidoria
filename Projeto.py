@@ -1,13 +1,13 @@
 '''Projeto 2026.1 Fase 2 (Ouvidoria + MYSQL)
-Trabalho feito por João Henrique de França e Silva
-Última edição: 13/04/2026
+Trabalho feito por João Henrique de França e Silva e Joel Nicollas Silva Pereira
+Última edição: 14/04/2026 9:04
 '''
 
 import mysql.connector
 from time import sleep as t
 
 def criar_conexao():
-    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "Jhfs180907@")
+    conexao = mysql.connector.connect(host = "localhost", user = "root", password = "admin") #Ou qualquer outra senha
     cursor = conexao.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS banco_dados;")
     cursor.execute("USE banco_dados;")
@@ -17,8 +17,8 @@ def criar_conexao():
 
 def vazio(conexao):
     cursor = conexao.cursor()
-    cursor.execute("SELECT * FROM reclamacoes;")
-    tamanho = len(cursor.fetchall())
+    cursor.execute("SELECT COUNT(*) FROM reclamacoes;")
+    tamanho = cursor.fetchone()[0]
     if tamanho == 0:
         print("A lista está vazia")
         t(1.5)
